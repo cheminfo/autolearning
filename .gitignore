@@ -4,3 +4,7 @@ node_modules
 .npmignore
 
 npm-debug.log
+
+.idea/workspace.xml
+
+.idea/workspace.xml
