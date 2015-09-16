@@ -21,7 +21,7 @@ function compare(A,B){
 
 
 function comparePredictors(options){
-    var other = options.to;
+    var other = "h1";
     var db = options.db;
     var folder = options.dataset;
     var avgError = 0;
@@ -34,6 +34,8 @@ function comparePredictors(options){
         }
         else{
             spinus = SD.spinusPred1H(molecule);
+            console.log("Saving...");
+            File.save(molecules[i].replace(".mol","."+other),JSON.stringify(spinus));
         }
         var h1pred = nmrShiftDBPred1H(molecule,{db:db});
 

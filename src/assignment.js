@@ -26,22 +26,26 @@ function integration(signals, sum){
     return signals2;
 }
 
-function autoAssign(molfile, spectra, options){
+function autoAssign(entry, options){
     if(spectra.h1PeakList){
-        return assignmentFromPeakPicking(molfile, spectra, options);
+        return assignmentFromPeakPicking(entry, options);
     }
     else{
-        return assignmentFromRaw(molfile, spectra, options);
+        return assignmentFromRaw(entry, options);
     }
 }
 
-function assignmentFromRaw(molfile, spectra, options){
+function assignmentFromRaw(entry, options){
+
+    var molfile = entry.molfile;
+    var spectra = entry.spectra;
 
     var molecule=ACT.load(molfile);
 
     molecule.expandHydrogens();
-    var fullMolecule = molecule.toMolfile();
-    var diaIDs=molecule.getDiastereotopicAtomIDs();
+
+    entry.molecule = molecule;
+    entry.diaIDs = molecule.getDiastereotopicAtomIDs();
 
     //Simulate and process the 1H-NMR spectrum at 400MHz
     var jcampFile = molFiles[i].replace("mol_","h1_").replace(".mol",".jdx");
@@ -49,7 +53,8 @@ function assignmentFromRaw(molfile, spectra, options){
 
 
     var signals = spectraData1H.nmrPeakDetection({nStddev:3,baselineRejoin:5,compute:false});
-    //var solvent = spectraData1H.getParamString(".SOLVENT NAME", "unknown");
+    spectra.solvent = spectraData1H.getParamString(".SOLVENT NAME", "unknown");
+    entry.diaID = molecule.toIDCode();
 
     signals = integration(signals, molecule.countAtom("H"));
 
@@ -58,32 +63,37 @@ function assignmentFromRaw(molfile, spectra, options){
     }
     spectra.h1PeakList = signals;
 
-    return assignmentFromPeakPicking(molfile,spectra,options);
+    return assignmentFromPeakPicking(entry,options);
 }
 
-function assignmentFromPeakPicking(molfile, spectra, options){
+function assignmentFromPeakPicking(entry, options){
+    var molecule,diaIDs;
+    if(!entry.molecule){
+        molecule=ACT.load(molfile);
+        molecule.expandHydrogens();
+        diaIDs=molecule.getDiastereotopicAtomIDs();
 
-    var molecule=ACT.load(molfile);
-    molecule.expandHydrogens();
-    var fullMolecule = molecule.toMolfile();
-    if(typeof spectra.diaIDsCH=="undefined"){
-
-    }
-    var diaIDs=molecule.getDiastereotopicAtomIDs();
-
-    for (var j=0; j<diaIDs.length; j++) {
-        diaIDs[j].nbEquivalent=diaIDs[j].atoms.length;
-    }
-
-    diaIDs.sort(function(a,b) {
-        if (a.element==b.element) {
-            return b.nbEquivalent-a.nbEquivalent;
+        for (var j=0; j<diaIDs.length; j++) {
+            diaIDs[j].nbEquivalent=diaIDs[j].atoms.length;
         }
-        return a.element<b.element?1:-1;
-    });
+
+        diaIDs.sort(function(a,b) {
+            if (a.element==b.element) {
+                return b.nbEquivalent-a.nbEquivalent;
+            }
+            return a.element<b.element?1:-1;
+        });
+        entry.molecule=molecule;
+        entry.diaIDs = diaIDs;
+        entry.diaID = molecule.toIDCode();
+    }
+    else{
+        molecule = entry.molecule;
+        diaIDs = entry.diaIDs;
+    }
 
     //H1 prediction
-    var h1pred = nmrShiftDBPred1H(fullMolecule,{db:options.db,debug:options.debug});
+    var h1pred = nmrShiftDBPred1H(molecule.toMolfile(),{db:options.db,debug:options.debug});
     if(h1pred.length==0)
         return null;
 
@@ -115,9 +125,8 @@ function assignmentFromPeakPicking(molfile, spectra, options){
             index++;
         }
     }
-    diaIDs=diaIDsCH;
     try{
-        return SD.autoAssignment(diaIDs, spectra.h1PeakList, null, null, null, null, 1 ,3000,0,0,-1);
+        return SD.autoAssignment(diaIDsCH, spectra.h1PeakList, null, null, null, null, 1 ,3000,0,0,-1);
     }
     catch(e){
         console.log("Could not assign this molecule.");
