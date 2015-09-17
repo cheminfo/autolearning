@@ -5,6 +5,7 @@ define(["nmrShiftDBPred1H","integration"],function (nmrShiftDBPred1H, integratio
 
         function autoAssign(entry, options){
             if(spectra.h1PeakList){
+                return assignmentFromPeakPicking(entry, options);
             }
             else{
                 return assignmentFromRaw(entry, options);
