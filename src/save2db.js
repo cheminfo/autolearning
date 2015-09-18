@@ -4,11 +4,11 @@
 define(function () {
     //There is any atom to add to the database?
     //options={diaID,diaIDs,catalogID,datasetName,solvent}
-    function save2db(annotations, options) {
+    function save2db(annotations, db, options) {
         var countOk = 0;
         if (annotations.length > 0) {
             //Check in the molecule table. If the molecule has been inserted, return the key.
-            qresult = db.select("SELECT * FROM molecule WHERE _moleculeID='" + sdfi.diaID + "'");
+            qresult = db.select("SELECT * FROM molecule WHERE _moleculeID='" + options.diaID + "'");
 
             var res = 0;
             var _chemicalID = 0;
@@ -26,7 +26,7 @@ define(function () {
                 _chemicalID = qresult.fk_chemicalID;
             }
 
-            var atoms = [];
+            //var atoms = [];
             var atoms = {};
             for (var j = 0; j < options.diaIDs.length; j++) {
                 //console.log(sdfi.diaIDs[j].id);
@@ -44,7 +44,9 @@ define(function () {
                     fk_moleculeID: options.diaID + ""
                 };
                 //Try to insert it. If it already exist do nothin.
-                db.insert("atom", atom);
+                qresult = db.select("SELECT _atomID from atom WHERE _atomID='" + atom._atomID + "'");
+                if (qresult == null || qresult.length == 0)
+                    db.insert("atom", atom);
                 atoms[options.diaIDs[j].id + ""] = atom;
 
             }
@@ -68,8 +70,8 @@ define(function () {
             //I will delete all the assignments for this molecule
             //qresult = db.select("DELETE FROM assignment WHERE fk_spectrumID="+_spectrumID);
             for (var j = 0; j < annotations.length; j++) {
-                for (var k = 0; k < annotations[j]._highlight.length; k++) {
-                    var atomID = annotations[j]._highlight[k] + "";
+                for (var k = 0; k < annotations[j].diaIDs.length; k++) {
+                    var atomID = annotations[j].diaIDs[k] + "";
 
                     var ref_atom = atoms[atomID];
 
@@ -79,8 +81,11 @@ define(function () {
                         //qresult = db.select("SELECT * from assignment WHERE fk_spectrumID="+_spectrumID+" AND fk_atomID = '"+atomID+"'");
 
                         //if(qresult==null||qresult.length==0){
+                        if((typeof annotations[j].delta1)==="undefined" ){
+                            annotations[j].delta1 = (annotations[j].stopX + annotations[j].startX)/2;
+                        }
                         var assignment = {
-                            chemicalShift: (parseFloat(annotations[j].info.stopX) + parseFloat(annotations[j].info.startX)) / 2,
+                            chemicalShift: annotations[j].delta1,
                             multiplicity: "",
                             integration: 1,
                             batchID: options.iteration,

@@ -39,13 +39,15 @@ define(["integration"],function (integration) {
                     var spectraData1H = SD.load(molFiles[i].jcamp.replace(/\\n/g, "\n"));
 
                     var signals = spectraData1H.nmrPeakDetection({nStddev: 3, baselineRejoin: 5, compute: false});
-                    sdfi.solvent = spectraData1H.getParamString(".SOLVENT NAME", "unknown");
 
-                    sdfi.h1PeakList = integration(signals, molecule.countAtom("H"));
+                    var h1PeakList = integration(signals, molecule.countAtom("H"));
 
-                    for (var j = 0; j < sdfi.signals.length; j++) {
-                        sdfi.signals[j]._highlight = [-(j + 1)];
+                    for (var j = 0; j < h1PeakList.length; j++) {
+                        h1PeakList[j]._highlight = [-(j + 1)];
                     }
+
+                    sdfi.spectra = {"h1PeakList":h1PeakList,"solvent":spectraData1H.getParamString(".SOLVENT NAME", "unknown")}
+
 
                     sdfi.diaIDs = diaIDs;
                     for (var j = 0; j < diaIDs.length; j++) {

@@ -4,7 +4,7 @@
 define(["nmrShiftDBPred1H","integration"],function (nmrShiftDBPred1H, integration) {
 
         function autoAssign(entry, options){
-            if(spectra.h1PeakList){
+            if(entry.spectra.h1PeakList){
                 return assignmentFromPeakPicking(entry, options);
             }
             else{
@@ -13,7 +13,6 @@ define(["nmrShiftDBPred1H","integration"],function (nmrShiftDBPred1H, integratio
         }
 
         function assignmentFromRaw(entry, options){
-
             var molfile = entry.molfile;
             var spectra = entry.spectra;
 
@@ -38,13 +37,16 @@ define(["nmrShiftDBPred1H","integration"],function (nmrShiftDBPred1H, integratio
             for(var j=0;j< signals.length;j++){
                 signals[j]._highlight=[-(j+1)];
             }
+
             spectra.h1PeakList = signals;
 
             return assignmentFromPeakPicking(entry,options);
         }
 
         function assignmentFromPeakPicking(entry, options){
+
             var molecule,diaIDs;
+            var spectra = entry.spectra;
             if(!entry.molecule){
                 molecule=ACT.load(molfile);
                 molecule.expandHydrogens();
@@ -70,7 +72,8 @@ define(["nmrShiftDBPred1H","integration"],function (nmrShiftDBPred1H, integratio
             }
 
             //H1 prediction
-            var h1pred = nmrShiftDBPred1H(molecule.toMolfile(),{db:options.db,debug:options.debug});
+            var h1pred = nmrShiftDBPred1H(molecule.toMolfile(),options);
+
             if(h1pred.length==0)
                 return null;
 
@@ -102,6 +105,7 @@ define(["nmrShiftDBPred1H","integration"],function (nmrShiftDBPred1H, integratio
                     index++;
                 }
             }
+            entry.diaIDsCH = diaIDsCH;
             try{
                 return SD.autoAssignment(diaIDsCH, spectra.h1PeakList, null, null, null, null, 1 ,3000,0,0,-1);
             }

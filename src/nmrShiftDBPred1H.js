@@ -3,17 +3,17 @@
  */
 define(function () {
 
-    var script = "SELECT AVG(chemicalShift) AS cs, STD(chemicalShift)  AS std, COUNT(chemicalShift) AS ncs, MIN(chemicalShift) as min, MAX(chemicalShift) as max FROM assignment where batchID > 1 AND BINARY ";//hose5='dgH`EBYReZYiIjjjjj@OzP`NET'";
-    var medianQ = "SELECT chemicalShift, fk_atomID FROM assignment where batchID > 1 AND BINARY ";
+    var script = "SELECT AVG(chemicalShift) AS cs, STD(chemicalShift)  AS std, COUNT(chemicalShift) AS ncs, MIN(chemicalShift) as min, MAX(chemicalShift) as max FROM assignment where ";//hose5='dgH`EBYReZYiIjjjjj@OzP`NET'";
+    var medianQ = "SELECT chemicalShift, fk_atomID FROM assignment where ";
 
-    function query(atom, lvl, debug) {
+    function query(atom, lvl, db, iteration, debug) {
         var atomHOSE = atom["hose" + lvl];
         var res = null;
         if (atomHOSE != "undefined" && atomHOSE != "null") {
-            res = db.select(script + "hose" + lvl + "='" + atomHOSE + "'", {format: "json"});
+            res = db.select(script +"batchID >"+iteration+" AND BINARY hose" + lvl + "='" + atomHOSE + "'", {format: "json"});
         }
         if (res != null && res[0].cs) {
-            var median = db.select(medianQ + "hose" + lvl + "='" + atomHOSE + "' ORDER BY chemicalShift", {format: "json"});
+            var median = db.select(medianQ +"batchID >"+iteration+" AND BINARY hose" + lvl + "='" + atomHOSE + "' ORDER BY chemicalShift", {format: "json"});
             if (median.length % 2 == 0) {
                 res[0].median = (median[median.length / 2 - 1].chemicalShift
                     + median[median.length / 2].chemicalShift) / 2.0;
@@ -39,15 +39,20 @@ define(function () {
     function nmrShiftDBPred1H(molfile, options) {
         var db = null;
         var closeDB = true;
+        var iteration = -1;
         options = options || {};
         if (options.db) {
             db = options.db;
             closeDB = false;
         }
         else
-            db = new DB.MySQL("localhost", "mynmrshiftdb2", "nmrshiftdb", "xxswagxx");
+            db = new DB.MySQL("localhost", "mynmrshiftdb3", "nmrshiftdb", "xxswagxx");
+
+        //console.log(db);
         options.debug = options.debug || false;
         var algorithm = options.algorithm || 0;
+        if(typeof options.iteration ==="undefined")
+            iteration = options.iteration;
         var mol = ACT.load(molfile);
         mol.expandHydrogens();
         var diaIDs = mol.getDiastereotopicAtomIDs("H");
@@ -72,7 +77,6 @@ define(function () {
             };
             for (var k = diaIDs[j].atoms.length - 1; k >= 0; k--) {
                 atoms[diaIDs[j].atoms[k]] = JSON.parse(JSON.stringify(atom));
-                ;
                 atomNumbers.push(diaIDs[j].atoms[k]);
             }
         }
@@ -85,13 +89,13 @@ define(function () {
         for (var j = 0; j < atomNumbers.length; j++) {
             var atom = atoms[atomNumbers[j]];
             var level = 0;
-            var res = query(atom, 5, options.debug);
+            var res = query(atom, 5, db, iteration, options.debug);
             if (res === null) {
-                res = query(atom, 4, options.debug);
+                res = query(atom, 4, db, iteration, options.debug);
                 if (res === null) {
-                    res = query(atom, 3, options.debug);
+                    res = query(atom, 3, db, iteration, options.debug);
                     if (res === null) {
-                        res = query(atom, 2, options.debug);
+                        res = query(atom, 2, db, iteration, options.debug);
                         if (res === null) {
                             res = [{
                                 cs: -9999999,

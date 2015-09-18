@@ -3,15 +3,16 @@
  */
 define(["autoAssign","nmrShiftDBPred1H","save2db","comparePredictors","./preprocess/cheminfo","./preprocess/maybridge","./preprocess/reiner"],
     function(autoAssign,nmrShiftDBPred1H,save2db,comparePredictors, cheminfo, maybridge, reiner){
-        var maxIterations = 20;
-        var testSet = "/Research/NMR/AutoAssign/data/cobasSimulated";
+        var maxIterations = 3;
+        var testSet = "/data/cheminfo";//"/Research/NMR/AutoAssign/data/cobasSimulated";
 
-        var dataset1 = cheminfo.load("/Research/NMR/AutoAssign/data/learningDataSet","learningDataSet",{});
-        var dataset2 = maybridge.load("/Research/NMR/AutoAssign/data/maybridge","maybridge",{});
-        var dataset3 = reiner.load("/Research/NMR/AutoAssign/data/Reiner","reiner",{});
+        var dataset1 = cheminfo.load("/data/cheminfo","cheminfo",{keepMolecule:true});
+        //console.log("dataset1.length "+dataset1.length);
+        //var dataset1 = cheminfo.load("/Research/NMR/AutoAssign/data/learningDataSet","learningDataSet",{});
+        var dataset2 = maybridge.load("/Research/NMR/AutoAssign/data/maybridge","maybridge",{keepMolecule:true});
+        var dataset3 = reiner.load("/Research/NMR/AutoAssign/data/Reiner","reiner",{keepMolecule:true});
 
         var datasets = [dataset1,dataset2,dataset3];
-        var max = dataset1.length;
 
         var db = new DB.MySQL("localhost","mynmrshiftdb3","nmrshiftdb","xxswagxx");
 
@@ -22,13 +23,15 @@ define(["autoAssign","nmrShiftDBPred1H","save2db","comparePredictors","./preproc
                 var count = 0;
                 for(var ds = 0;ds<datasets.length;ds++){
                     var dataset = datasets[ds];
+                    var max = dataset.length;
                     // we could now loop on the sdf to add the int index
                     for (var i=0; i<max; i++) {
                         try{
                             var catalogID = dataset[i].id;
                             var datasetName = dataset[i].dataset;
 
-                            var result = autoAssign(dataset[i], {db:db, debug:false});
+                            var result = autoAssign(dataset[i], {"db":db, debug:false, iteration:iteration-1});
+
                             var signals = dataset[i].spectra.h1PeakList;
                             var diaIDsCH = dataset[i].diaIDsCH;
                             var diaID = dataset[i].diaID;
@@ -80,7 +83,7 @@ define(["autoAssign","nmrShiftDBPred1H","save2db","comparePredictors","./preproc
                                     }
                                 }
 
-                                count+=save2db(annotations,{
+                                count+=save2db(annotations, db, {
                                     diaID:diaID,
                                     diaIDs:diaIDsCH,
                                     catalogID:catalogID,
@@ -90,14 +93,15 @@ define(["autoAssign","nmrShiftDBPred1H","save2db","comparePredictors","./preproc
                             }
                         }
                         catch(e){
-                            console.log("Error in training. Iteration: "+iteration+" step: "+i +" "+e);
+                            console.log("Error in training. dataset: "+ds+" Iteration: "+iteration+" step: "+i +" "+e);
                         }
                     }
                 }
                 //Evalueate the error
-                var error = comparePredictors({"db":db,"dataset":testSet});
-                console.log(iteration+" "+error);
+                console.log("Iteration "+iteration);
                 console.log("New entries in the db: "+count);
+                var error = comparePredictors({"db":db,"dataset":testSet,"iteration":iteration-1});
+                console.log("Error: "+error.error+" count: "+error.count);
             }
             console.log("Done");
             db.close();
