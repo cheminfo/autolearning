@@ -6,7 +6,6 @@ define(["nmrShiftDBPred1H"],function (nmrShiftDBPred1H) {
         var error = 0;
         var count = 0;
         for (var i = 0; i < A.length; i++) {
-            console.log(A[i].delta1);
             for (var j = 0; j < B.length; j++) {
                 if (A[i].diaIDs[0] == B[j].diaIDs[0]) {
                     if(A[i].delta1!=-9999999&&B[j].delta1!=-9999999){
