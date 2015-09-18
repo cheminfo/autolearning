@@ -3,8 +3,8 @@
  */
 define(["autoAssign","nmrShiftDBPred1H","save2db","comparePredictors","./preprocess/cheminfo","./preprocess/maybridge","./preprocess/reiner"],
     function(autoAssign,nmrShiftDBPred1H,save2db,comparePredictors, cheminfo, maybridge, reiner){
-        var maxIterations = 3;
-        var testSet = "/data/cheminfo";//"/Research/NMR/AutoAssign/data/cobasSimulated";
+        var maxIterations = 30;
+        var testSet = "/data/cobas";//"/Research/NMR/AutoAssign/data/cobasSimulated";
 
         var dataset1 = cheminfo.load("/data/cheminfo","cheminfo",{keepMolecule:true});
         //console.log("dataset1.length "+dataset1.length);
@@ -16,10 +16,20 @@ define(["autoAssign","nmrShiftDBPred1H","save2db","comparePredictors","./preproc
 
         var db = new DB.MySQL("localhost","mynmrshiftdb3","nmrshiftdb","xxswagxx");
 
+        db.delete2("assignment",{},{"all":true});
+        db.delete2("spectrum",{},{"all":true});
+        db.delete2("atom",{},{"all":true});
+        db.delete2("molecule",{},{"all":true});
+        db.delete2("chemical",{},{"all":true});
+
+        var start,date, prevError=0, prevCont=0;
         try{
             //Run the learning process. After each iteration the system has seen every single molecule once
             //We have to use another stop criteria like convergence
-            for(var iteration=0;iteration<maxIterations;iteration++){
+            var iteration= 0,convergence=false;
+            while(iteration<maxIterations&&!convergence){
+                date = new Date();
+                start = date.getTime();
                 var count = 0;
                 for(var ds = 0;ds<datasets.length;ds++){
                     var dataset = datasets[ds];
@@ -30,7 +40,7 @@ define(["autoAssign","nmrShiftDBPred1H","save2db","comparePredictors","./preproc
                             var catalogID = dataset[i].id;
                             var datasetName = dataset[i].dataset;
 
-                            var result = autoAssign(dataset[i], {"db":db, debug:false, iteration:iteration-1});
+                            var result = autoAssign(dataset[i], {"db":db, debug:false, iteration:"="+(iteration-1)});
 
                             var signals = dataset[i].spectra.h1PeakList;
                             var diaIDsCH = dataset[i].diaIDsCH;
@@ -97,11 +107,24 @@ define(["autoAssign","nmrShiftDBPred1H","save2db","comparePredictors","./preproc
                         }
                     }
                 }
+                date = new Date();
                 //Evalueate the error
                 console.log("Iteration "+iteration);
+                console.log("Time "+(date.getTime()-start));
                 console.log("New entries in the db: "+count);
-                var error = comparePredictors({"db":db,"dataset":testSet,"iteration":iteration-1});
+                start = date.getTime()
+                var error = comparePredictors({"db":db,"dataset":testSet,"iteration":"="+iteration});
+                date = new Date();
                 console.log("Error: "+error.error+" count: "+error.count);
+                console.log("Time comparing "+(date.getTime()-start));
+
+                if(prevCont == count&&prevError<=error){
+                    convergence = true;
+                }
+                prevCont = count;
+                prevError = error;
+
+                iteration++;
             }
             console.log("Done");
             db.close();
@@ -112,6 +135,8 @@ define(["autoAssign","nmrShiftDBPred1H","save2db","comparePredictors","./preproc
             db.close();
         }
     }
+
+
 );
 
 

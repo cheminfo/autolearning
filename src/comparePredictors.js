@@ -30,20 +30,27 @@ define(["nmrShiftDBPred1H"],function (nmrShiftDBPred1H) {
         var count = 0;
         var molecules = File.dir(folder, {filter: ".mol"});//"/Research/NMR/AutoAssign/data/test"
         for (var i = 0; i < molecules.length; i++) {
-            var molecule = File.load(molecules[i]);
+
+            var molfile = File.load(molecules[i]);
             var spinus = null;
             if (File.exists(molecules[i].replace(".mol", "." + other))) {
                 spinus = File.loadJSON(molecules[i].replace(".mol", "." + other));
             }
             else {
-                spinus = SD.spinusPred1H(molecule);
+                var molecule=ACT.load(molfile);
+                molecule.expandHydrogens();
+                var diaIDs=molecule.getDiastereotopicAtomIDs("H");
+                spinus = SD.spinusPred1H(molecule.toMolfile(),{"diaIDs":diaIDs});
                 console.log("Saving...");
                 File.save(molecules[i].replace(".mol", "." + other), JSON.stringify(spinus));
             }
-            var h1pred = nmrShiftDBPred1H(molecule, {db: db, debug:false, iteration:options.iteration});
-            var result = compare(h1pred, spinus);
-            avgError+= result.error;
-            count+=result.count;
+            if(spinus.length>0){
+                var h1pred = nmrShiftDBPred1H(molfile, {db: db, debug:false, iteration:options.iteration});
+                var result = compare(h1pred, spinus);
+                avgError+= result.error;
+                count+=result.count;
+            }
+
         }
         return {error:avgError / molecules.length,count:count};
     }

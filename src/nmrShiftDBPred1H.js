@@ -10,10 +10,10 @@ define(function () {
         var atomHOSE = atom["hose" + lvl];
         var res = null;
         if (atomHOSE != "undefined" && atomHOSE != "null") {
-            res = db.select(script +"batchID >"+iteration+" AND BINARY hose" + lvl + "='" + atomHOSE + "'", {format: "json"});
+            res = db.select(script +"batchID "+iteration+" AND BINARY hose" + lvl + "='" + atomHOSE + "'", {format: "json"});
         }
         if (res != null && res[0].cs) {
-            var median = db.select(medianQ +"batchID >"+iteration+" AND BINARY hose" + lvl + "='" + atomHOSE + "' ORDER BY chemicalShift", {format: "json"});
+            var median = db.select(medianQ +"batchID "+iteration+" AND BINARY hose" + lvl + "='" + atomHOSE + "' ORDER BY chemicalShift", {format: "json"});
             if (median.length % 2 == 0) {
                 res[0].median = (median[median.length / 2 - 1].chemicalShift
                     + median[median.length / 2].chemicalShift) / 2.0;
@@ -39,7 +39,7 @@ define(function () {
     function nmrShiftDBPred1H(molfile, options) {
         var db = null;
         var closeDB = true;
-        var iteration = -1;
+
         options = options || {};
         if (options.db) {
             db = options.db;
@@ -51,6 +51,8 @@ define(function () {
         //console.log(db);
         options.debug = options.debug || false;
         var algorithm = options.algorithm || 0;
+
+        var iteration = "> -1";
         if(typeof options.iteration ==="undefined")
             iteration = options.iteration;
         var mol = ACT.load(molfile);
