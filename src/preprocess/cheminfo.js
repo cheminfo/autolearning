@@ -26,7 +26,7 @@ define(["integration"],function (integration) {
                 molecule.expandHydrogens();
 
                 if (keepMolfile) {
-                    sdfi.molfile = molfile;
+                    sdfi.molfile = molecule.toMolfile()+"";
                 }
                 if (keepMolecule) {
                     sdfi.molecule = molecule;

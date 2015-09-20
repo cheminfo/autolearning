@@ -40,32 +40,42 @@ define(function () {
         var db = null;
         var closeDB = true;
 
-        options = options || {};
+        var options = options || {};
         if (options.db) {
             db = options.db;
             closeDB = false;
         }
-        else
+        else {
             db = new DB.MySQL("localhost", "mynmrshiftdb3", "nmrshiftdb", "xxswagxx");
+        }
+
 
         //console.log(db);
         options.debug = options.debug || false;
         var algorithm = options.algorithm || 0;
 
         var iteration = "> -1";
-        if(typeof options.iteration ==="undefined")
+        //console.log(options);
+        if (typeof options.iteration === "string") {
             iteration = options.iteration;
-        var mol = ACT.load(molfile);
-        mol.expandHydrogens();
+
+        }
+        //console.log("iteration "+iteration);
+        var mol = molfile;
+        if(typeof molfile==="string"){
+            mol = ACT.load(molfile);
+            mol.expandHydrogens();
+        }
         var diaIDs = mol.getDiastereotopicAtomIDs("H");
-        var infoCOSY = mol.getCouplings();
+        var infoCOSY = [];//mol.getCouplings();
         //console.log(infoCOSY);
 
-        var atoms = {};
-        var atomNumbers = [];
-        for (var j = 0; j < diaIDs.length; j++) {
-            var hosesString = ACT.getHoseCodesFromDiaID(diaIDs[j].id, 5, {algorithm: algorithm});
-            var atom = {
+        var atoms = {},atom;
+        var atomNumbers = [],hosesString;
+        var i, k,j;
+        for (j = diaIDs.length-1; j >=0; j--) {
+            hosesString = ACT.getHoseCodesFromDiaID(diaIDs[j].id, 5, {algorithm: algorithm});
+            atom = {
                 diaIDs: [diaIDs[j].id + ""],
                 nucleus: "1H",
                 pattern: "s",
@@ -77,7 +87,7 @@ define(function () {
                 hose4: hosesString[3] + "",
                 hose5: hosesString[4] + ""
             };
-            for (var k = diaIDs[j].atoms.length - 1; k >= 0; k--) {
+            for (k = diaIDs[j].atoms.length - 1; k >= 0; k--) {
                 atoms[diaIDs[j].atoms[k]] = JSON.parse(JSON.stringify(atom));
                 atomNumbers.push(diaIDs[j].atoms[k]);
             }
@@ -86,11 +96,11 @@ define(function () {
 
         //var script2 = "select chemicalShift FROM assignment where ";//hose5='dgH`EBYReZYiIjjjjj@OzP`NET'";
 
-        var toReturn = [];
-        var median = [];
-        for (var j = 0; j < atomNumbers.length; j++) {
-            var atom = atoms[atomNumbers[j]];
-            var level = 0;
+        var toReturn = new Array(atomNumbers.length);
+        //var median = [];
+        for (j = 0; j < atomNumbers.length; j++) {
+            atom = atoms[atomNumbers[j]];
+            //var level = 0;
             var res = query(atom, 5, db, iteration, options.debug);
             if (res === null) {
                 res = query(atom, 4, db, iteration, options.debug);
@@ -132,7 +142,7 @@ define(function () {
 
             //Add the predicted couplings
             //console.log(atomNumbers[j]+" "+infoCOSY[0].atom1);
-            for (var i = infoCOSY.length - 1; i >= 0; i--) {
+            for (i = infoCOSY.length - 1; i >= 0; i--) {
                 if (infoCOSY[i].atom1 - 1 == atomNumbers[j] && infoCOSY[i].coupling > 2) {
                     atom.nmrJs.push({
                         "assignmentTo": infoCOSY[i].atom2 - 1 + "",
@@ -142,7 +152,7 @@ define(function () {
                 }
             }
 
-            toReturn.push(atom);
+            toReturn[j]=atom;
         }
         if (closeDB)
             db.close();

@@ -45,10 +45,10 @@ define(["nmrShiftDBPred1H","integration"],function (nmrShiftDBPred1H, integratio
 
         function assignmentFromPeakPicking(entry, options){
 
-            var molecule,diaIDs;
+            var molecule,diaIDs,molfile;
             var spectra = entry.spectra;
             if(!entry.molecule){
-                molecule=ACT.load(molfile);
+                molecule=ACT.load(entry.molfile);
                 molecule.expandHydrogens();
                 diaIDs=molecule.getDiastereotopicAtomIDs();
 
@@ -72,7 +72,7 @@ define(["nmrShiftDBPred1H","integration"],function (nmrShiftDBPred1H, integratio
             }
 
             //H1 prediction
-            var h1pred = nmrShiftDBPred1H(molecule.toMolfile(),options);
+            var h1pred = nmrShiftDBPred1H(molecule, options);
 
             if(h1pred.length==0)
                 return null;
