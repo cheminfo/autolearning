@@ -44,7 +44,7 @@ define(["autoAssign","nmrShiftDBPred1H","save2db","cmp2asg","./preprocess/chemin
                             catalogID = dataset[i].id;
                             datasetName = dataset[i].dataset;
 
-                            result =  autoAssign(dataset[i], {"db":db, debug:false, iteration:">-1"});
+                            result =  autoAssign(dataset[i], {"db":db, debug:false, iteration:"IN ("+(iteration-1)+","+iteration+")"});
 
                             signals = dataset[i].spectra.h1PeakList;
                             diaIDsCH = dataset[i].diaIDsCH;
@@ -120,7 +120,8 @@ define(["autoAssign","nmrShiftDBPred1H","save2db","cmp2asg","./preprocess/chemin
                 console.log("Time "+(date.getTime()-start));
                 console.log("New entries in the db: "+count);
                 start = date.getTime();
-                var error = cmp2asg(testSet,{"db":db,"dataset":testSet,"iteration":">-1"});//{error:1,count:1};//comparePredictors({"db":db,"dataset":testSet,"iteration":"="+(iteration-1)});
+                //var error = comparePredictors(datasetSim,{"db":db,"dataset":testSet,"iteration":"="+iteration});
+                var error = cmp2asg(testSet,{"db":db,"dataset":testSet,"iteration":"="+iteration});//{error:1,count:1};//comparePredictors({"db":db,"dataset":testSet,"iteration":"="+(iteration-1)});
                 date = new Date();
                 console.log("Error: "+error.error+" count: "+error.count);
                 console.log("Time comparing "+(date.getTime()-start));
