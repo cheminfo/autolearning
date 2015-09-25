@@ -67,6 +67,7 @@ define(function () {
             mol.expandHydrogens();
         }
         var diaIDs = mol.getDiastereotopicAtomIDs("H");
+
         var infoCOSY = [];//mol.getCouplings();
         //console.log(infoCOSY);
 

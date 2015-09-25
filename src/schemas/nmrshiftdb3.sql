@@ -1,3 +1,12 @@
+CREATE USER 'nmrshiftdb'@'localhost' IDENTIFIED BY 'xxswagxx';
+
+CREATE DATABASE mynmrshiftdb;
+
+GRANT ALL PRIVILEGES ON mynmrshiftdb.* TO 'nmrshiftdb'@'localhost';
+FLUSH PRIVILEGES;
+
+USE mynmrshiftdb;
+
 DROP TABLE IF EXISTS chemical;
 
 CREATE TABLE chemical(

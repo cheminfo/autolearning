@@ -1,10 +1,10 @@
 /**
  * Created by acastillo on 9/11/15.
  */
-define(["autoAssign","nmrShiftDBPred1H","save2db","comparePredictors","./preprocess/cheminfo","./preprocess/maybridge","./preprocess/reiner"],
-    function(autoAssign,nmrShiftDBPred1H,save2db,comparePredictors, cheminfo, maybridge, reiner){
-        var maxIterations =40;
-        var testSet = "/data/cobas";//"/Research/NMR/AutoAssign/data/cobasSimulated";
+define(["autoAssign","nmrShiftDBPred1H","save2db","cmp2asg","./preprocess/cheminfo","./preprocess/maybridge","./preprocess/reiner"],
+    function(autoAssign,nmrShiftDBPred1H,save2db,cmp2asg, cheminfo, maybridge, reiner){
+        var maxIterations =20;
+        var testSet = File.loadJSON("/data/assigned298.json");//File.parse("/data/nmrsignal298.json");//"/Research/NMR/AutoAssign/data/cobasSimulated";
 
         var dataset1 = cheminfo.load("/data/cheminfo","cheminfo",{keepMolecule:true});
         //console.log("dataset1.length "+dataset1.length);
@@ -13,7 +13,7 @@ define(["autoAssign","nmrShiftDBPred1H","save2db","comparePredictors","./preproc
         var dataset3 = reiner.load("/Research/NMR/AutoAssign/data/Reiner","reiner",{keepMolecule:true,keepMolfile:true});
 
         var datasets = [dataset1,dataset2,dataset3];
-        var datasetSim = [];
+        //var datasetSim = File.parse(testSet);
 
         var db = new DB.MySQL("localhost","mynmrshiftdb3","nmrshiftdb","xxswagxx");
 
@@ -119,8 +119,8 @@ define(["autoAssign","nmrShiftDBPred1H","save2db","comparePredictors","./preproc
                 console.log("Iteration "+iteration);
                 console.log("Time "+(date.getTime()-start));
                 console.log("New entries in the db: "+count);
-                start = date.getTime()
-                var error = comparePredictors(datasetSim,{"db":db,"dataset":testSet,"iteration":">-1"});//{error:1,count:1};//comparePredictors({"db":db,"dataset":testSet,"iteration":"="+(iteration-1)});
+                start = date.getTime();
+                var error = cmp2asg(testSet,{"db":db,"dataset":testSet,"iteration":">-1"});//{error:1,count:1};//comparePredictors({"db":db,"dataset":testSet,"iteration":"="+(iteration-1)});
                 date = new Date();
                 console.log("Error: "+error.error+" count: "+error.count);
                 console.log("Time comparing "+(date.getTime()-start));
