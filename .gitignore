@@ -7,4 +7,9 @@ npm-debug.log
 
 .idea/workspace.xml
 
+/src/data/cheminfo2D
+/src/data/cheminfo443
+/src/data/cobas
+/src/data/maybridge
 .idea/workspace.xml
+

@@ -2,30 +2,47 @@
  * Created by acastillo on 9/11/15.
  */
 define(["autoAssign","nmrShiftDBPred1H","save2db","cmp2asg","./preprocess/cheminfo","./preprocess/maybridge","./preprocess/reiner"],
-    function(autoAssign,nmrShiftDBPred1H,save2db,cmp2asg, cheminfo, maybridge, reiner){
-        var maxIterations =20;
+    function(autoAssign,nmrShiftDBPred1H,save2db,cmp2asg, cheminfo, maybridge, reiner) {
+        var maxIterations = 6;
         var testSet = File.loadJSON("/data/assigned298.json");//File.parse("/data/nmrsignal298.json");//"/Research/NMR/AutoAssign/data/cobasSimulated";
 
-        var dataset1 = cheminfo.load("/data/cheminfo","cheminfo",{keepMolecule:true});
+        var dataset1 = cheminfo.load("/data/cheminfo443", "cheminfo", {keepMolecule: true});
         //console.log("dataset1.length "+dataset1.length);
         //var dataset1 = cheminfo.load("/Research/NMR/AutoAssign/data/learningDataSet","learningDataSet",{});
-        var dataset2 = maybridge.load("/Research/NMR/AutoAssign/data/maybridge","maybridge",{keepMolecule:true,keepMolfile:true});
-        var dataset3 = reiner.load("/Research/NMR/AutoAssign/data/Reiner","reiner",{keepMolecule:true,keepMolfile:true});
+        var dataset2 = maybridge.load("/data/maybridge", "maybridge", {keepMolecule: true, keepMolfile: true});
+        var dataset3 = reiner.load("/data/Reiner", "reiner", {keepMolecule: true, keepMolfile: true});
 
-        var datasets = [dataset1,dataset2,dataset3];
+        var datasets = [dataset1, dataset2, dataset3];
         //var datasetSim = File.parse(testSet);
 
-        var db = new DB.MySQL("localhost","mynmrshiftdb3","nmrshiftdb","xxswagxx");
+        var db = new DB.MySQL("localhost", "mynmrshiftdb", "nmrshiftdb", "xxswagxx");
 
-        db.delete2("assignment",{},{"all":true});
-        db.delete2("spectrum",{},{"all":true});
-        db.delete2("atom",{},{"all":true});
-        db.delete2("molecule",{},{"all":true});
-        db.delete2("chemical",{},{"all":true});
+        db.delete2("assignment", {}, {"all": true});
+        db.delete2("spectrum", {}, {"all": true});
+        db.delete2("atom", {}, {"all": true});
+        db.delete2("molecule", {}, {"all": true});
+        db.delete2("chemical", {}, {"all": true});
 
-        var start,date, prevError=0, prevCont= 0,dataset,max,ds, i, j, k, l, m;
-        var catalogID,datasetName, signals,diaIDsCH,diaID,solvent,nSignals,asgK,highlight;
-        var result,assignment,annotations;
+        var start, date, prevError = 0, prevCont = 0, dataset, max, ds, i, j, k, l, m;
+        var catalogID, datasetName, signals, diaIDsCH, diaID, solvent, nSignals, asgK, highlight;
+        var result, assignment, annotations;
+
+        //Remove the overlap molecules from train and test
+        var removed = 0;
+        for (i = 0; i < testSet.length; i++) {
+            for(ds = 0;ds<datasets.length;ds++){
+                dataset = datasets[ds];
+                for (j=dataset.length-1;j>=0; j--){
+                    if(testSet[i].diaID == dataset[j].diaID){
+                        dataset.splice(j,1);
+                        removed++;
+                        break;
+                    }
+                }
+            }
+        }
+        console.log("Overlaped molecules: "+removed+".  They was removed from training datasets");
+
         try{
             //Run the learning process. After each iteration the system has seen every single molecule once
             //We have to use another stop criteria like convergence
@@ -44,7 +61,13 @@ define(["autoAssign","nmrShiftDBPred1H","save2db","cmp2asg","./preprocess/chemin
                             catalogID = dataset[i].id;
                             datasetName = dataset[i].dataset;
 
-                            result =  autoAssign(dataset[i], {"db":db, debug:false, iteration:"IN ("+(iteration-1)+","+iteration+")"});
+                            result =  autoAssign(dataset[i], {
+                                "db":db,
+                                "debug":false,
+                                "ignoreLabile":false,
+                                "iteration":"="+(iteration-1),
+                                "hoseLevels":[5,4]
+                            });//"IN ("+(iteration-1)+","+iteration+")"});
 
                             signals = dataset[i].spectra.h1PeakList;
                             diaIDsCH = dataset[i].diaIDsCH;
@@ -121,9 +144,22 @@ define(["autoAssign","nmrShiftDBPred1H","save2db","cmp2asg","./preprocess/chemin
                 console.log("New entries in the db: "+count);
                 start = date.getTime();
                 //var error = comparePredictors(datasetSim,{"db":db,"dataset":testSet,"iteration":"="+iteration});
-                var error = cmp2asg(testSet,{"db":db,"dataset":testSet,"iteration":"="+iteration});//{error:1,count:1};//comparePredictors({"db":db,"dataset":testSet,"iteration":"="+(iteration-1)});
+                var histParams = {from:0,to:1,nBins:30};
+                var error = cmp2asg(testSet,{
+                    "db":db,
+                    "dataset":testSet,
+                    "iteration":"="+iteration,
+                    "ignoreLabile":true,
+                    "histParams":histParams,
+                    "hoseLevels":[5,4]});//{error:1,count:1};//comparePredictors({"db":db,"dataset":testSet,"iteration":"="+(iteration-1)});
                 date = new Date();
-                console.log("Error: "+error.error+" count: "+error.count);
+                console.log("Error: "+error.error+" count: "+error.count+" min: "+error.min+" max: "+error.max);
+                var data = error.hist;
+                var sumHist=0
+                for(var i = 0; i < data.length; i ++){
+                    sumHist+=data[i].y/error.count;
+                    console.log(data[i].x + "," +  data[i].y + ","+data[i].y/error.count+ ","+sumHist);
+                }
                 console.log("Time comparing "+(date.getTime()-start));
 
                 if(prevCont == count&&prevError<=error){
@@ -142,6 +178,7 @@ define(["autoAssign","nmrShiftDBPred1H","save2db","cmp2asg","./preprocess/chemin
             console.log("Fail "+e);
             db.close();
         }
+
     }
 
 

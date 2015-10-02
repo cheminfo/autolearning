@@ -53,6 +53,10 @@ define(function () {
         //console.log(db);
         options.debug = options.debug || false;
         var algorithm = options.algorithm || 0;
+        var levels = options.hoseLevels || [5,4,3,2];
+        levels.sort(function(a, b) {
+            return b - a;
+        });
 
         var iteration = "> -1";
         //console.log(options);
@@ -102,27 +106,22 @@ define(function () {
         for (j = 0; j < atomNumbers.length; j++) {
             atom = atoms[atomNumbers[j]];
             //var level = 0;
-            var res = query(atom, 5, db, iteration, options.debug);
+            var res=null;
+            k=0;
+            while(res===null&&k<levels.length){
+                res = query(atom, levels[k++], db, iteration, options.debug);
+            }
             if (res === null) {
-                res = query(atom, 4, db, iteration, options.debug);
-                if (res === null) {
-                    res = query(atom, 3, db, iteration, options.debug);
-                    if (res === null) {
-                        res = query(atom, 2, db, iteration, options.debug);
-                        if (res === null) {
-                            res = [{
-                                cs: -9999999,
-                                ncs: 0,
-                                std: 0,
-                                min: 0,
-                                max: 0,
-                                median: -9999999,
-                                level: 0,
-                                molecules: []
-                            }];
-                        }
-                    }
-                }
+                res = [{
+                    cs: -9999999,
+                    ncs: 0,
+                    std: 0,
+                    min: 0,
+                    max: 0,
+                    median: -9999999,
+                    level: 0,
+                    molecules: []
+                }];
             }
 
             atom.level = res[0].level;
@@ -133,9 +132,9 @@ define(function () {
             atom.median = res[0].median;
             atom.molecules = res[0].molecules;
             atom.peaks = [{intensity: 1, x: res[0].median}];
-            atom.assignment = "" + atomNumbers[j],
-                atom.atomIDs = ["" + atomNumbers[j]],
-                atom.ncs = res[0].ncs;
+            atom.assignment = "" + atomNumbers[j];
+            atom.atomIDs = ["" + atomNumbers[j]];
+            atom.ncs = res[0].ncs;
             atom.std = res[0].std;
             atom.min = res[0].min;
             atom.max = res[0].max;
@@ -157,6 +156,30 @@ define(function () {
         }
         if (closeDB)
             db.close();
+
+        if(options.ignoreLabile){
+            var linksOH = mol.getPaths(1,1,"H","O",false);
+            var linksNH = mol.getPaths(1,1,"H","N",false);
+            //console.log(h1pred.length);
+            for(j=toReturn.length-1;j>=0;j--){
+                for(var k=0;k<linksOH.length;k++){
+                    if(toReturn[j].diaIDs[0]==linksOH[k].diaID1 && toReturn[j].error){
+                        toReturn.splice(j,1);
+                        break;
+                    }
+                }
+            }
+            //console.log(h1pred.length);
+            for(j=toReturn.length-1;j>=0;j--){
+                for(var k=0;k<linksNH.length;k++){
+                    if(toReturn[j].diaIDs[0]==linksNH[k].diaID1){
+                        toReturn.splice(j,1);
+                        break;
+                    }
+                }
+            }
+        }
+
         return toReturn;
     }
 

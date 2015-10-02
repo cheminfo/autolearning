@@ -96,7 +96,7 @@ define(["nmrShiftDBPred1H","integration"],function (nmrShiftDBPred1H, integratio
                                     diaIDsCH[index].error=20;
                                 }
                                 else{
-                                    diaIDsCH[index].error=(2*h1pred[indexSignal].std+10/Math.sqrt(h1pred[indexSignal].ncs));
+                                    diaIDsCH[index].error=4*h1pred[indexSignal].std;//(3*h1pred[indexSignal].std+10/Math.sqrt(h1pred[indexSignal].ncs));
                                 }
                             }
                             indexSignal++;

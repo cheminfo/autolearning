@@ -42,8 +42,11 @@ define(["integration"],function (integration) {
 
                     var h1PeakList = integration(signals, molecule.countAtom("H"));
 
-                    for (var j = 0; j < h1PeakList.length; j++) {
+                    for (var j = h1PeakList.length-1;j>=0; j--) {
                         h1PeakList[j]._highlight = [-(j + 1)];
+                        if(h1PeakList[j].delta1<0||h1PeakList[j].delta1>16){
+                            h1PeakList.splice(j,1);
+                        }
                     }
 
                     sdfi.spectra = {"h1PeakList":h1PeakList,"solvent":spectraData1H.getParamString(".SOLVENT NAME", "unknown")}

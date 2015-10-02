@@ -76,7 +76,7 @@ if(molecules.length==assignments.length){
             }
 
             //Now, what to do with this assignment??
-            result[i]={"assignment":nmrSignals,"molfile":(molecule.toMolfile()+"").replace(/\n/g,"\\n")};
+            result[i]={"diaID":molecule.toIDCode()+"","entryID":molecules[i].entryID,"assignment":nmrSignals,"molfile":(molecule.toMolfile()+"").replace(/\n/g,"\\n")};
         }
         else{
             console.log("Something wrong with the order: "+i);
