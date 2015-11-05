@@ -1,8 +1,8 @@
 /**
  * Created by acastillo on 9/11/15.
  */
-define(["autoAssign","nmrShiftDBPred1H","save2db","cmp2asg","./preprocess/cheminfo","./preprocess/maybridge","./preprocess/reiner"],
-    function(autoAssign,nmrShiftDBPred1H,save2db,cmp2asg, cheminfo, maybridge, reiner) {
+define(["./core/autoAssign","./core/nmrShiftDBPred1H","./core/save2db","core/stats","./preprocess/cheminfo","./preprocess/maybridge","./preprocess/reiner"],
+    function(autoAssign,nmrShiftDBPred1H,save2db, stats, cheminfo, maybridge, reiner) {
         var maxIterations = 6;
         var testSet = File.loadJSON("/data/assigned298.json");//File.parse("/data/nmrsignal298.json");//"/Research/NMR/AutoAssign/data/cobasSimulated";
 
@@ -15,18 +15,19 @@ define(["autoAssign","nmrShiftDBPred1H","save2db","cmp2asg","./preprocess/chemin
         var datasets = [dataset1, dataset2, dataset3];
         //var datasetSim = File.parse(testSet);
 
-        var db = new DB.MySQL("localhost", "mynmrshiftdb", "nmrshiftdb", "xxswagxx");
+        /*var db = new DB.MySQL("localhost", "mynmrshiftdb", "nmrshiftdb", "xxswagxx");
 
         db.delete2("assignment", {}, {"all": true});
         db.delete2("spectrum", {}, {"all": true});
         db.delete2("atom", {}, {"all": true});
         db.delete2("molecule", {}, {"all": true});
         db.delete2("chemical", {}, {"all": true});
-
+        */
         var start, date, prevError = 0, prevCont = 0, dataset, max, ds, i, j, k, l, m;
         var catalogID, datasetName, signals, diaIDsCH, diaID, solvent, nSignals, asgK, highlight;
         var result, assignment, annotations;
-
+        console.log("Cheminfo All: "+dataset1.length);
+        console.log("MayBridge All: "+dataset2.length);
         //Remove the overlap molecules from train and test
         var removed = 0;
         for (i = 0; i < testSet.length; i++) {
@@ -41,8 +42,11 @@ define(["autoAssign","nmrShiftDBPred1H","save2db","cmp2asg","./preprocess/chemin
                 }
             }
         }
-        console.log("Overlaped molecules: "+removed+".  They was removed from training datasets");
+        console.log("Cheminfo Final: "+dataset1.length);
+        console.log("MayBridge Final: "+dataset2.length);
 
+        console.log("Overlaped molecules: "+removed+".  They was removed from training datasets");
+        /*
         try{
             //Run the learning process. After each iteration the system has seen every single molecule once
             //We have to use another stop criteria like convergence
@@ -145,7 +149,7 @@ define(["autoAssign","nmrShiftDBPred1H","save2db","cmp2asg","./preprocess/chemin
                 start = date.getTime();
                 //var error = comparePredictors(datasetSim,{"db":db,"dataset":testSet,"iteration":"="+iteration});
                 var histParams = {from:0,to:1,nBins:30};
-                var error = cmp2asg(testSet,{
+                var error = stats.cmp2asg(testSet,{
                     "db":db,
                     "dataset":testSet,
                     "iteration":"="+iteration,
@@ -178,7 +182,7 @@ define(["autoAssign","nmrShiftDBPred1H","save2db","cmp2asg","./preprocess/chemin
             console.log("Fail "+e);
             db.close();
         }
-
+        */
     }
 
 

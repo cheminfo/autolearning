@@ -54,6 +54,7 @@ define(function () {
         options.debug = options.debug || false;
         var algorithm = options.algorithm || 0;
         var levels = options.hoseLevels || [5,4,3,2];
+        var couplings = options.getCouplings || false;
         levels.sort(function(a, b) {
             return b - a;
         });
@@ -73,6 +74,9 @@ define(function () {
         var diaIDs = mol.getDiastereotopicAtomIDs("H");
 
         var infoCOSY = [];//mol.getCouplings();
+        if(couplings){
+            infoCOSY = mol.getCouplings();
+        }
         //console.log(infoCOSY);
 
         var atoms = {},atom;
@@ -163,7 +167,7 @@ define(function () {
             //console.log(h1pred.length);
             for(j=toReturn.length-1;j>=0;j--){
                 for(var k=0;k<linksOH.length;k++){
-                    if(toReturn[j].diaIDs[0]==linksOH[k].diaID1 && toReturn[j].error){
+                    if(toReturn[j].diaIDs[0]==linksOH[k].diaID1){
                         toReturn.splice(j,1);
                         break;
                     }

@@ -1,13 +1,13 @@
 /**
  * Created by acastillo on 9/11/15.
  */
-define(["autoAssign","nmrShiftDBPred1H","save2db","cmp2asg","./preprocess/cheminfo","./preprocess/maybridge","./preprocess/reiner"],
-    function(autoAssign,nmrShiftDBPred1H,save2db,cmp2asg, cheminfo, maybridge, reiner){
+define(["./core/autoAssign","./core/nmrShiftDBPred1H","./core/save2db","core/stats","./preprocess/cheminfo","./preprocess/maybridge","./preprocess/reiner"],
+    function(autoAssign,nmrShiftDBPred1H,save2db,stats, cheminfo, maybridge, reiner){
         var maxIterations =1;
         var testSet = File.loadJSON("/data/assigned298.json");
         var db = new DB.MySQL("localhost","mynmrshiftdb3","nmrshiftdb","xxswagxx");
         var histParams = {from:0,to:1,nBins:100};
-        var error = cmp2asg(testSet,{
+        var error = stats.cmp2asg(testSet,{
             "db":db,
             "dataset":testSet,
             "iteration":"=5",
