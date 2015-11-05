@@ -1,8 +1,8 @@
 /**
  * Created by acastillo on 9/11/15.
  */
-define(["./core/autoAssign","./core/nmrShiftDBPred1H","./core/save2db","core/stats","./preprocess/cheminfo","./preprocess/maybridge","./preprocess/reiner"],
-    function(autoAssign,nmrShiftDBPred1H,save2db, stats, cheminfo, maybridge, reiner) {
+define(["database","./core/autoAssign","./core/nmrShiftDBPred1H","./core/save2db","core/stats","./preprocess/cheminfo","./preprocess/maybridge","./preprocess/reiner"],
+    function(connection,autoAssign,nmrShiftDBPred1H,save2db, stats, cheminfo, maybridge, reiner) {
         var maxIterations = 6;
         var testSet = File.loadJSON("/data/assigned298.json");//File.parse("/data/nmrsignal298.json");//"/Research/NMR/AutoAssign/data/cobasSimulated";
 
@@ -15,14 +15,14 @@ define(["./core/autoAssign","./core/nmrShiftDBPred1H","./core/save2db","core/sta
         var datasets = [dataset1, dataset2, dataset3];
         //var datasetSim = File.parse(testSet);
 
-        /*var db = new DB.MySQL("localhost", "mynmrshiftdb", "nmrshiftdb", "xxswagxx");
+        var db = new DB.MySQL(connection.host, connection.database, connection.user, connection.password);
 
         db.delete2("assignment", {}, {"all": true});
         db.delete2("spectrum", {}, {"all": true});
         db.delete2("atom", {}, {"all": true});
         db.delete2("molecule", {}, {"all": true});
         db.delete2("chemical", {}, {"all": true});
-        */
+
         var start, date, prevError = 0, prevCont = 0, dataset, max, ds, i, j, k, l, m;
         var catalogID, datasetName, signals, diaIDsCH, diaID, solvent, nSignals, asgK, highlight;
         var result, assignment, annotations;
@@ -44,9 +44,8 @@ define(["./core/autoAssign","./core/nmrShiftDBPred1H","./core/save2db","core/sta
         }
         console.log("Cheminfo Final: "+dataset1.length);
         console.log("MayBridge Final: "+dataset2.length);
-
         console.log("Overlaped molecules: "+removed+".  They was removed from training datasets");
-        /*
+
         try{
             //Run the learning process. After each iteration the system has seen every single molecule once
             //We have to use another stop criteria like convergence
@@ -182,7 +181,7 @@ define(["./core/autoAssign","./core/nmrShiftDBPred1H","./core/save2db","core/sta
             console.log("Fail "+e);
             db.close();
         }
-        */
+
     }
 
 

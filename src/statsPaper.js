@@ -1,10 +1,12 @@
 /**
  * Created by acastillo on 9/11/15.
  */
-define(["./core/autoAssign","./core/nmrShiftDBPred1H","./core/save2db","core/stats","./preprocess/cheminfo","./preprocess/maybridge","./preprocess/reiner"],
-    function(autoAssign,nmrShiftDBPred1H,save2db,stats, cheminfo, maybridge, reiner){
+define(["database","./core/autoAssign","./core/nmrShiftDBPred1H","./core/save2db","core/stats","./preprocess/cheminfo","./preprocess/maybridge","./preprocess/reiner"],
+    function(connection,autoAssign,nmrShiftDBPred1H,save2db,stats, cheminfo, maybridge, reiner){
         var testSet = File.loadJSON("/data/assigned298.json");
-        var db = new DB.MySQL("localhost","mynmrshiftdb","nmrshiftdb","xxswagxx");
+
+        var db = new DB.MySQL(connection.host, connection.database, connection.user, connection.password);
+
         var histParams = {from:0,to:1,nBins:100};
 
         var MAXITER = 6, hoseLevels, error, data, sumHist,i, j, k, y,x=null;
@@ -20,7 +22,7 @@ define(["./core/autoAssign","./core/nmrShiftDBPred1H","./core/save2db","core/sta
                 "hoseLevels":[5,4,3,2]
             })});
             hoseLevels = [];
-            /*for(j=5;j>=2;j--){
+            for(j=5;j>=2;j--){
                 console.log("Level: "+j);
                 hoseLevels.push(j);
                 error = stats.cmp2asg(testSet,{
@@ -53,7 +55,7 @@ define(["./core/autoAssign","./core/nmrShiftDBPred1H","./core/save2db","core/sta
                     "iteration": i,
                     "hoseLevels": hoseLevels.join(",")
                 });
-            }*/
+            }
         }
         File.save("/all_predictions_match_nolabile.json",JSON.stringify({"hoseCounts":hoseResult,"errors":result}));
     }
