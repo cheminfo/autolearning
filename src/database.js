@@ -1,7 +1,7 @@
 define(function(){
   return {
   "host": "localhost",
-  "database": "mynmrshiftdb",
+  "database": "mynmrshiftdb1",
   "user": "nmrshiftdb",
   "password": "xxswagxx"
   }

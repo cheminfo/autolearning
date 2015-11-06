@@ -1,4 +1,4 @@
-USE mynmrshiftdb3;
+USE mynmrshiftdb1;
 
 SELECT hose5, AVG(chemicalShift), std, min, max, total_rows as ncs FROM (SELECT t1.hose5, t1.chemicalShift, t2.std, t2.min, t2.max, t2.total_rows FROM (
    SELECT hose5, @rownum:=IF(@s = hose5, @rownum + 1, 0) AS row_number,
