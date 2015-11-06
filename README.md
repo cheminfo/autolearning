@@ -1,7 +1,7 @@
 # autolearning
 
 
-Web page: [http://visualizer.epfl.ch/tiny/xUpdmNQwUDkB7Ef4W5Kd]
+Try Ask Ernö in our [visualizer] (http://visualizer.epfl.ch/tiny/xUpdmNQwUDkB7Ef4W5Kd)
 
 ##Installation
 
