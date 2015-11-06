@@ -43,4 +43,21 @@ Web page: [http://visualizer.epfl.ch/tiny/xUpdmNQwUDkB7Ef4W5Kd]
   
     ``` ./train.sh ```
 
-  12. Congratulations! You have a database that can be used to make new 1H-chemical shifts predictions. You may be intersted in creating a condensed table from the database to simplyfy and speedup the prediction by running createPredictionTable.sh. An example of how to use this table for predictions can be found in src/test
+  12. Congratulations! You have a database that can be used to make new 1H-chemical shifts predictions. 
+  13. You may be intersted in creating a condensed table from the database to simplyfy and speedup the prediction by running createPredictionTable.sh. An example of how to use this table for predictions of 1H-NMR chemical shifts can be found in src/test
+  
+  ```
+  define(["../core/fastNmrShiftDBPred1H"],function (nmrShiftDBPred1H) {
+    var molecule = File.load("/test/mol_0.mol");
+    var db = File.loadJSON("/h1_database.json");//Our condensed table for off-line predictions
+    var h1pred = nmrShiftDBPred1H(molecule, {
+        "db": db,
+        "debug":false,
+        "ignoreLabile":false,
+        "getCouplings":true,
+        "hoseLevels":[5,4,3,2]//HOSE sizes to consider in the query
+    });
+    console.log("Each group of magnetically equivalent atoms share the same atomID");
+    console.log(h1pred);
+  });
+  ```
