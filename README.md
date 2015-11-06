@@ -43,4 +43,4 @@ Web page: [http://visualizer.epfl.ch/tiny/xUpdmNQwUDkB7Ef4W5Kd]
   
     ``` ./train.sh ```
 
-  12. Congratulations! You have a database that can be used to make new 1H-chemical shifts predictions. You may be intersted in creating a condensed table from the database to simplyfy and speedup the prediction by running createPredictionTable.sh. An example of how to use this table for predictions can be found here: [Ask Ernö] (http://visualizer.epfl.ch/tiny/Tkc7OhSOLeCujPPoPiXb)
+  12. Congratulations! You have a database that can be used to make new 1H-chemical shifts predictions. You may be intersted in creating a condensed table from the database to simplyfy and speedup the prediction by running createPredictionTable.sh. An example of how to use this table for predictions can be found in src/test
