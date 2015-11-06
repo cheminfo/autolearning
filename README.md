@@ -44,7 +44,7 @@ Web page: [http://visualizer.epfl.ch/tiny/xUpdmNQwUDkB7Ef4W5Kd]
     ``` ./train.sh ```
 
   12. Congratulations! You have a database that can be used to make new 1H-chemical shifts predictions. 
-  13. You may be intersted in creating a condensed table from the database to simplyfy and speedup the prediction by running createPredictionTable.sh. An example of how to use this table for predictions of 1H-NMR chemical shifts can be found in src/test
+  13. You may be intersted in creating a condensed table from the database to simplify and speedup the prediction by running    `createPredictionTable.sh`. An example of how to use this table for predictions of 1H-NMR chemical shifts can be found in src/test
   
   ```
   define(["../core/fastNmrShiftDBPred1H"],function (nmrShiftDBPred1H) {
