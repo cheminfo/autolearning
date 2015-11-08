@@ -16,7 +16,7 @@ Try Ask Ernö in our [visualizer] (http://visualizer.epfl.ch/tiny/xUpdmNQwUDkB7E
 
   4. Download [the maybridge dataset] (http://script.epfl.ch/script/HD/Load/1ZGgqjWVbr?filename=test%40patiny.com%2FResearch%2FNMR%2FAutoAssign%2Fdata%2Fmaybridge%2Fjcamp.bz2) and [cheminfo443 dataset] (http://script.epfl.ch/script/HD/Load/f40zy9WWyj?filename=test%40patiny.com%2FResearch%2FNMR%2FAutoAssign%2Fdata%2FlearningDataSet.zip)
   
-```curl http://script.epfl.ch/script/HD/Load/1ZGgqjWVbr?filename=test%40patiny.com%2FResearch%2FNMR%2FAutoAssign%2Fdata%2Fmaybridge%2Fjcamp.bz2 > src/data/maybridge/jcamp.bz2; bzip2 -d src/data/maybridge/jcamp.bz2 ;./src/data/maybridge/split.sh  ./src/data/maybridge/jcamp.txt```
+```curl http://script.epfl.ch/script/HD/Load/1ZGgqjWVbr?filename=test%40patiny.com%2FResearch%2FNMR%2FAutoAssign%2Fdata%2Fmaybridge%2Fjcamp.bz2 > src/data/maybridge/jcamp.bz2; bzip2 -d src/data/maybridge/jcamp.bz2 ;./src/data/maybridge/split.sh  ./src/data/maybridge/jcamp```
 
 ```curl http://script.epfl.ch/script/HD/Load/WA8LUhjzYi?filename=test%40patiny.com%2FResearch%2FNMR%2FAutoAssign%2Fdata%2Fcheminfo443.zip > src/data/cheminfo443.zip ; src/data/cheminfo443.zip -d src/data/```
   
