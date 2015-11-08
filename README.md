@@ -32,7 +32,7 @@ Try Ask Ernö in our [visualizer] (http://visualizer.epfl.ch/tiny/xUpdmNQwUDkB7E
   USE mynmrshiftdb1;
   ```
   
-  6. Create your database to store your chemical shifts assignments
+  6. Create the database to store your chemical shifts assignments
   
     ```mysql -u root < src/schemas/nmrshiftdb.sql ```
 
