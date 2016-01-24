@@ -32,7 +32,7 @@ define(function () {
 
     /**
      * @function nmrShiftDBPred1H(molfile)
-     * This function predict shift for 1H-NMR, from a molfile by using the cheminfo reference data base.
+     * This function predicts the 1H-NMR chemical shifts from a molfile.
      * @param    molfile:string    A molfile content
      * @returns    +Object an array of NMRSignal1D
      */

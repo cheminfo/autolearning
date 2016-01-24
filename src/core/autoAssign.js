@@ -28,7 +28,7 @@ define(["nmrShiftDBPred1H","integration"],function (nmrShiftDBPred1H, integratio
             var spectraData1H = SD.load(spectra.h1);//
 
 
-            var signals = spectraData1H.nmrPeakDetection({nStddev:3,baselineRejoin:5,compute:false});
+            var signals = spectraData1H.nmrPeakDetection({nStddev:3, baselineRejoin:5, compute:false});
             spectra.solvent = spectraData1H.getParamString(".SOLVENT NAME", "unknown");
             entry.diaID = molecule.toIDCode();
 

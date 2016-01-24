@@ -3,7 +3,10 @@
  */
 define(["database","./core/autoAssign","./core/nmrShiftDBPred1H","./core/save2db","core/stats","./preprocess/cheminfo","./preprocess/maybridge","./preprocess/reiner"],
     function(connection,autoAssign,nmrShiftDBPred1H,save2db, stats, cheminfo, maybridge, reiner) {
-        var maxIterations = 6;
+
+        var maxIterations = 6; // Set the number of interations for training
+        var ignoreLabile = true;//Set the use of labile protons during training
+
         var testSet = File.loadJSON("/data/assigned298.json");//File.parse("/data/nmrsignal298.json");//"/Research/NMR/AutoAssign/data/cobasSimulated";
 
         var dataset1 = cheminfo.load("/data/cheminfo443", "cheminfo", {keepMolecule: true});
@@ -67,7 +70,7 @@ define(["database","./core/autoAssign","./core/nmrShiftDBPred1H","./core/save2db
                             result =  autoAssign(dataset[i], {
                                 "db":db,
                                 "debug":false,
-                                "ignoreLabile":false,
+                                "ignoreLabile":ignoreLabile,
                                 "iteration":"="+(iteration-1),
                                 "hoseLevels":[5,4]
                             });//"IN ("+(iteration-1)+","+iteration+")"});
@@ -77,7 +80,7 @@ define(["database","./core/autoAssign","./core/nmrShiftDBPred1H","./core/save2db
                             diaID = dataset[i].diaID;
                             solvent = dataset[i].spectra.solvent;
 
-                            if(result[result.length-1].state!="completed"&&result[result.length-1].nSolutions>result.length){
+                            if(result[result.length-1].state!="completed"||result[result.length-1].nSolutions>result.length){
                                 console.log("Too much solutions");
                                 continue;
                             }
@@ -152,9 +155,9 @@ define(["database","./core/autoAssign","./core/nmrShiftDBPred1H","./core/save2db
                     "db":db,
                     "dataset":testSet,
                     "iteration":"="+iteration,
-                    "ignoreLabile":true,
+                    "ignoreLabile":ignoreLabile,
                     "histParams":histParams,
-                    "hoseLevels":[5,4]});//{error:1,count:1};//comparePredictors({"db":db,"dataset":testSet,"iteration":"="+(iteration-1)});
+                    "hoseLevels":[5,4,3,2]});//{error:1,count:1};//comparePredictors({"db":db,"dataset":testSet,"iteration":"="+(iteration-1)});
                 date = new Date();
                 console.log("Error: "+error.error+" count: "+error.count+" min: "+error.min+" max: "+error.max);
                 var data = error.hist;
