@@ -1,17 +1,17 @@
 /**
  * Created by acastillo on 9/11/15.
  */
-define(["database","./core/autoAssign","./core/nmrShiftDBPred1H","./core/save2db","core/stats","./preprocess/cheminfo","./preprocess/maybridge","./preprocess/reiner"],
-    function(connection,autoAssign,nmrShiftDBPred1H,save2db,stats, cheminfo, maybridge, reiner){
+define(["database","./core/fastNmrShiftDBPred1H","./core/createPredictionTable" ,"core/stats"],
+    function(connection, nmrShiftDBPred1H, createPredictionTable, stats){
         var maxIterations =1;
         var testSet = File.loadJSON("/data/assigned298.json");
         var db = new DB.MySQL(connection.host, connection.database, connection.user, connection.password);
-
+        var fastDB = createPredictionTable(db, 5);
+        db.close();
         var histParams = {from:0,to:1,nBins:100};
         var error = stats.cmp2asg(testSet,{
             "db":db,
             "dataset":testSet,
-            "iteration":"=5",
             "ignoreLabile":false,
             "histParams":histParams,
             "hoseLevels":[5,4]});//{error:1,count:1};//comparePredictors({"db":db,"dataset":testSet,"iteration":"="+(iteration-1)});

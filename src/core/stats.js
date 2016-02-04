@@ -1,7 +1,7 @@
 /**
  * Created by acastillo on 9/14/15.
  */
-define(["nmrShiftDBPred1H","ext-lib/histogram"],function (nmrShiftDBPred1H, histogram) {
+define(["fastNmrShiftDBPred1H","ext-lib/histogram"],function (nmrShiftDBPred1H, histogram) {
     function compare(A, B, hist) {
         var error = 0, count = 0, max=0, min=9999999, tmp = 0;
         var i,j;
@@ -114,7 +114,7 @@ define(["nmrShiftDBPred1H","ext-lib/histogram"],function (nmrShiftDBPred1H, hist
             h1pred = nmrShiftDBPred1H(molecule, {
                 "db": db,
                 "debug":false,
-                "iteration":options.iteration,
+                "iterationQuery":options.iterationQuery,
                 "ignoreLabile":options.ignoreLabile,
                 "hoseLevels":options.hoseLevels
             });

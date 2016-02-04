@@ -14,7 +14,7 @@ define(["./core/integration"],function (integration) {
         //var datasetName = "learningDataSet";
         //var path = "/Research/NMR/AutoAssign/data/"+datasetName;
         var molFiles = File.dir(path,filter);
-        var max = molFiles.length;
+        var max = 100;//molFiles.length;
         var result = [];//new Array(max);
         // we could now loop on the sdf to add the int index
         for (var i = 0; i < max; i++) {

@@ -1,7 +1,7 @@
 /**
  * Created by acastillo on 9/11/15.
  */
-define(function () {
+define([],function () {
 
     /**
      * @function nmrShiftDBPred1H(molfile)
@@ -17,7 +17,7 @@ define(function () {
             db = options.db;
         }
         else {
-            db = File.loadJSON("../h1_database.json");
+            db =[[],[],[],[],[],[],[]];//File.loadJSON("../h1_database.json");
         }
 
 
@@ -31,12 +31,6 @@ define(function () {
             return b - a;
         });
 
-        var iteration = "> -1";
-        //console.log(options);
-        if (typeof options.iteration === "string") {
-            iteration = options.iteration;
-
-        }
         //console.log("iteration "+iteration);
         var mol = molfile;
         if(typeof molfile==="string"){
@@ -89,7 +83,7 @@ define(function () {
                 res = db[levels[k]][atom["hose"+levels[k]]];
                 k++;
             }
-            if (res === null) {
+            if (res == null) {
                 res = {
                     cs: -9999999,
                     ncs: 0,
@@ -98,7 +92,6 @@ define(function () {
                     max: 0
                 };
             }
-
             atom.level = levels[k-1];
             atom.delta1 = res.cs;
             atom.startX = atom.delta1 - res.std * 2;

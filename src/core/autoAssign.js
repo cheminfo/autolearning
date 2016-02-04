@@ -1,7 +1,7 @@
 /**
  * Created by acastillo on 9/11/15.
  */
-define(["nmrShiftDBPred1H","integration"],function (nmrShiftDBPred1H, integration) {
+define(["fastNmrShiftDBPred1H","integration"],function (nmrShiftDBPred1H, integration) {
 
         function autoAssign(entry, options){
             if(entry.spectra.h1PeakList){
@@ -46,6 +46,7 @@ define(["nmrShiftDBPred1H","integration"],function (nmrShiftDBPred1H, integratio
         function assignmentFromPeakPicking(entry, options){
 
             var molecule,diaIDs,molfile;
+
             var spectra = entry.spectra;
             if(!entry.molecule){
                 molecule=ACT.load(entry.molfile);
@@ -92,12 +93,15 @@ define(["nmrShiftDBPred1H","integration"],function (nmrShiftDBPred1H, integratio
                             var tmpSignal1H = JSON.stringify(h1pred[indexSignal]);
                             if(tmpSignal1H.indexOf(tmpDiaID)>=0){
                                 diaIDsCH[index].delta1=h1pred[indexSignal].delta1;
+                                diaIDsCH[index].error = getError(h1pred[indexSignal],options);
+                                /*console.log(h1pred[indexSignal]);
                                 if(h1pred[indexSignal].std==0||h1pred[indexSignal].ncs==0){
                                     diaIDsCH[index].error=20;
                                 }
                                 else{
                                     diaIDsCH[index].error=4*h1pred[indexSignal].std;//(3*h1pred[indexSignal].std+10/Math.sqrt(h1pred[indexSignal].ncs));
                                 }
+                                console.log("Error "+diaIDsCH[index].error);*/
                             }
                             indexSignal++;
                         }
@@ -113,6 +117,21 @@ define(["nmrShiftDBPred1H","integration"],function (nmrShiftDBPred1H, integratio
                 console.log("Could not assign this molecule.");
                 return null;
             }
+        }
+
+        function  getError(prediction, param){
+            //Never use predictions with less than 3 votes
+            if(prediction.std==0||prediction.ncs<3){
+               return 20;
+            }
+            else{
+                //factor is between 1 and +inf
+                //console.log(prediction.ncs+" "+(param.iteration+1)+" "+param.learningRatio);
+                var factor = 3*prediction.std/
+                    (Math.pow(prediction.ncs,(param.iteration+1)*param.learningRatio));//(param.iteration+1)*param.learningRatio*h1pred[indexSignal].ncs;
+                return 3*prediction.std+factor;
+            }
+            return 20;
         }
 
         return autoAssign;

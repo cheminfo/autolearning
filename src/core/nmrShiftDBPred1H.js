@@ -59,13 +59,13 @@ define(function () {
             return b - a;
         });
 
-        var iteration = "> -1";
+        var iterationQuery = "> -1";
         //console.log(options);
-        if (typeof options.iteration === "string") {
-            iteration = options.iteration;
+        if (typeof options.iterationQuery === "string") {
+            iterationQuery = options.iterationQuery;
 
         }
-        //console.log("iteration "+iteration);
+        //console.log("iterationQuery "+iterationQuery);
         var mol = molfile;
         if(typeof molfile==="string"){
             mol = ACT.load(molfile);
@@ -113,7 +113,7 @@ define(function () {
             var res=null;
             k=0;
             while(res===null&&k<levels.length){
-                res = query(atom, levels[k++], db, iteration, options.debug);
+                res = query(atom, levels[k++], db, iterationQuery, options.debug);
             }
             if (res === null) {
                 res = [{

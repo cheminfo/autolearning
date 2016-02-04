@@ -1,19 +1,23 @@
 /**
  * Created by acastillo on 9/11/15.
  */
-define(["database","./core/autoAssign","./core/nmrShiftDBPred1H","./core/save2db","core/stats","./preprocess/cheminfo","./preprocess/maybridge","./preprocess/reiner"],
-    function(connection,autoAssign,nmrShiftDBPred1H,save2db, stats, cheminfo, maybridge, reiner) {
+define(["database","./core/autoAssign","./core/fastNmrShiftDBPred1H",
+    "./core/save2db","core/stats","./core/createPredictionTable","./preprocess/cheminfo","./preprocess/maybridge",
+    "./preprocess/reiner"],
+    function(connection,autoAssign,nmrShiftDBPred1H,save2db, stats, createPredictionTable, cheminfo, maybridge, reiner) {
 
-        var maxIterations = 6; // Set the number of interations for training
-        var ignoreLabile = true;//Set the use of labile protons during training
+        var maxIterations = 10; // Set the number of interations for training
+        var ignoreLabile = false;//Set the use of labile protons during training
+        var learningRatio = 0.6; //A number between 0 and 1
 
         var testSet = File.loadJSON("/data/assigned298.json");//File.parse("/data/nmrsignal298.json");//"/Research/NMR/AutoAssign/data/cobasSimulated";
 
         var dataset1 = cheminfo.load("/data/cheminfo443", "cheminfo", {keepMolecule: true});
+        //dataset1 = dataset1.splice(0,2);
         //console.log("dataset1.length "+dataset1.length);
         //var dataset1 = cheminfo.load("/Research/NMR/AutoAssign/data/learningDataSet","learningDataSet",{});
-        var dataset2 = maybridge.load("/data/maybridge", "maybridge", {keepMolecule: true, keepMolfile: true});
-        var dataset3 = reiner.load("/data/Reiner", "reiner", {keepMolecule: true, keepMolfile: true});
+        var dataset2 = [];//maybridge.load("/data/maybridge", "maybridge", {keepMolecule: true, keepMolfile: true});
+        var dataset3 = [];//reiner.load("/data/Reiner", "reiner", {keepMolecule: true, keepMolfile: true});
 
         var datasets = [dataset1, dataset2, dataset3];
         //var datasetSim = File.parse(testSet);
@@ -29,6 +33,7 @@ define(["database","./core/autoAssign","./core/nmrShiftDBPred1H","./core/save2db
         var start, date, prevError = 0, prevCont = 0, dataset, max, ds, i, j, k, l, m;
         var catalogID, datasetName, signals, diaIDsCH, diaID, solvent, nSignals, asgK, highlight;
         var result, assignment, annotations;
+        var fastDB=null;
         console.log("Cheminfo All: "+dataset1.length);
         console.log("MayBridge All: "+dataset2.length);
         //Remove the overlap molecules from train and test
@@ -68,11 +73,13 @@ define(["database","./core/autoAssign","./core/nmrShiftDBPred1H","./core/save2db
                             datasetName = dataset[i].dataset;
 
                             result =  autoAssign(dataset[i], {
-                                "db":db,
+                                "db":fastDB,
                                 "debug":false,
                                 "ignoreLabile":ignoreLabile,
-                                "iteration":"="+(iteration-1),
-                                "hoseLevels":[5,4]
+                                "iterationQuery":"="+(iteration-1),
+                                "hoseLevels":[5,4,3],
+                                "learningRatio":learningRatio,
+                                "iteration":iteration
                             });//"IN ("+(iteration-1)+","+iteration+")"});
 
                             signals = dataset[i].spectra.h1PeakList;
@@ -143,6 +150,11 @@ define(["database","./core/autoAssign","./core/nmrShiftDBPred1H","./core/save2db
                         }
                     }
                 }
+
+                //Create the fast prediction table. It contains the prediction at last iteration
+                //Becasuse that, the iteration parameter has not effect on the stats
+                fastDB = createPredictionTable(db,iteration);
+                //console.log(fastDB);
                 date = new Date();
                 //Evalueate the error
                 console.log("Iteration "+iteration);
@@ -152,12 +164,12 @@ define(["database","./core/autoAssign","./core/nmrShiftDBPred1H","./core/save2db
                 //var error = comparePredictors(datasetSim,{"db":db,"dataset":testSet,"iteration":"="+iteration});
                 var histParams = {from:0,to:1,nBins:30};
                 var error = stats.cmp2asg(testSet,{
-                    "db":db,
+                    "db":fastDB,
                     "dataset":testSet,
-                    "iteration":"="+iteration,
+                    "iterationQuery":"="+iteration,
                     "ignoreLabile":ignoreLabile,
                     "histParams":histParams,
-                    "hoseLevels":[5,4,3,2]});//{error:1,count:1};//comparePredictors({"db":db,"dataset":testSet,"iteration":"="+(iteration-1)});
+                    "hoseLevels":[5,4,3]});//{error:1,count:1};//comparePredictors({"db":db,"dataset":testSet,"iteration":"="+(iteration-1)});
                 date = new Date();
                 console.log("Error: "+error.error+" count: "+error.count+" min: "+error.min+" max: "+error.max);
                 var data = error.hist;
@@ -186,7 +198,6 @@ define(["database","./core/autoAssign","./core/nmrShiftDBPred1H","./core/save2db
         }
 
     }
-
 
 );
 

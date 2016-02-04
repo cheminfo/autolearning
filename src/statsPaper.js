@@ -1,24 +1,25 @@
 /**
  * Created by acastillo on 9/11/15.
  */
-define(["database","./core/autoAssign","./core/nmrShiftDBPred1H","./core/save2db","core/stats","./preprocess/cheminfo","./preprocess/maybridge","./preprocess/reiner"],
-    function(connection,autoAssign,nmrShiftDBPred1H,save2db,stats, cheminfo, maybridge, reiner){
+define(["database","./core/autoAssign","./core/fastNmrShiftDBPred1H","./core/save2db","core/stats",
+    "./core/createPredictionTable", "./preprocess/cheminfo","./preprocess/maybridge","./preprocess/reiner"],
+    function(connection,autoAssign,nmrShiftDBPred1H,save2db,stats, createPredictionTable, cheminfo, maybridge, reiner){
         var testSet = File.loadJSON("/data/assigned298.json");
-
+        var ignoreLabile = true;
         var db = new DB.MySQL(connection.host, connection.database, connection.user, connection.password);
-
         var histParams = {from:0,to:1,nBins:100};
 
-        var MAXITER = 6, hoseLevels, error, data, sumHist,i, j, k, y,x=null;
+        var MAXITER = 10, hoseLevels, error, data, sumHist,i, j, k, y,x=null;
         var result = [];
         var hoseResult = [];
         for(i=0;i<MAXITER;i++){
+            var fastDB = createPredictionTable(db,i);
             console.log("Iteration: "+i);
             hoseResult.push({"iteration": i, values: stats.hoseStats(testSet,{
-                "db":db,
+                "db":fastDB,
+                "iterationQuery":"="+i,
                 "dataset":testSet,
-                "iteration":"="+i,
-                "ignoreLabile":true,
+                "ignoreLabile":ignoreLabile,
                 "hoseLevels":[5,4,3,2]
             })});
             hoseLevels = [];
@@ -26,10 +27,10 @@ define(["database","./core/autoAssign","./core/nmrShiftDBPred1H","./core/save2db
                 console.log("Level: "+j);
                 hoseLevels.push(j);
                 error = stats.cmp2asg(testSet,{
-                    "db":db,
+                    "db":fastDB,
+                    "iterationQuery":"="+i,
                     "dataset":testSet,
-                    "iteration":"="+i,
-                    "ignoreLabile":false,
+                    "ignoreLabile":ignoreLabile,
                     "histParams":histParams,
                     "hoseLevels":hoseLevels
                 });
@@ -57,7 +58,9 @@ define(["database","./core/autoAssign","./core/nmrShiftDBPred1H","./core/save2db
                 });
             }
         }
+
         File.save("/all_predictions_match_nolabile.json",JSON.stringify({"hoseCounts":hoseResult,"errors":result}));
+        db.close();
     }
 );
 
