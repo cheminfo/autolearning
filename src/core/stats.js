@@ -1,7 +1,7 @@
 /**
  * Created by acastillo on 9/14/15.
  */
-define(["fastNmrShiftDBPred1H","ext-lib/histogram"],function (nmrShiftDBPred1H, histogram) {
+define(["ext-lib/histogram"],function (histogram) {
     function compare(A, B, hist) {
         var error = 0, count = 0, max=0, min=9999999, tmp = 0;
         var i,j;
@@ -58,7 +58,7 @@ define(["fastNmrShiftDBPred1H","ext-lib/histogram"],function (nmrShiftDBPred1H, 
         }
     }
 
-    function hoseStats(dataSet, options){
+    function hoseStats(dataSet, nmrShiftDBPred1H, options){
         //console.log(options);
         //var db = new DB.MySQL("localhost","mynmrshiftdb3","nmrshiftdb","xxswagxx");
         var molecule,h1pred,result=[0,0,0,0,0,0], i,j;
@@ -78,7 +78,7 @@ define(["fastNmrShiftDBPred1H","ext-lib/histogram"],function (nmrShiftDBPred1H, 
             h1pred = nmrShiftDBPred1H(molecule, {
                 "db": db,
                 "debug":true,
-                "iteration":options.iteration,
+                "iterationQuery":options.iterationQuery,
                 "ignoreLabile":options.ignoreLabile,
                 "hoseLevels":options.hoseLevels
             });
@@ -93,7 +93,7 @@ define(["fastNmrShiftDBPred1H","ext-lib/histogram"],function (nmrShiftDBPred1H, 
     }
 
 
-    function cmp2asg(dataSet, options) {
+    function cmp2asg(dataSet, nmrShiftDBPred1H, options) {
         //console.log(options);
         //var db = new DB.MySQL("localhost","mynmrshiftdb3","nmrshiftdb","xxswagxx");
         var molecule,h1pred,result,avgError=0,count= 0,min=9999999,max=0;
@@ -140,7 +140,7 @@ define(["fastNmrShiftDBPred1H","ext-lib/histogram"],function (nmrShiftDBPred1H, 
         })};
     }
 
-    function comparePredictors(dataSet, options) {
+    function comparePredictors(dataSet, nmrShiftDBPred1H, options) {
         //console.log(options);
         //var db = new DB.MySQL("localhost","mynmrshiftdb3","nmrshiftdb","xxswagxx");
         var other = "h1",db = options.db,folder = options.dataset, avgError=0,count= 0,min=9999999,max=0;
@@ -177,7 +177,7 @@ define(["fastNmrShiftDBPred1H","ext-lib/histogram"],function (nmrShiftDBPred1H, 
                 h1pred = nmrShiftDBPred1H(molecule, {
                     "db": db,
                     "debug":false,
-                    "iteration":options.iteration,
+                    "iterationQuery":options.iterationQuery,
                     "ignoreLabile":options.ignoreLabile,
                     "hoseLevels":options.hoseLevels
                 });

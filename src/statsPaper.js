@@ -1,7 +1,7 @@
 /**
  * Created by acastillo on 9/11/15.
  */
-define(["database","./core/autoAssign","./core/fastNmrShiftDBPred1H","./core/save2db","core/stats",
+define(["database","./core/autoAssign","./core/nmrShiftDBPred1H","./core/save2db","core/stats",
     "./core/createPredictionTable", "./preprocess/cheminfo","./preprocess/maybridge","./preprocess/reiner"],
     function(connection,autoAssign,nmrShiftDBPred1H,save2db,stats, createPredictionTable, cheminfo, maybridge, reiner){
         var testSet = File.loadJSON("/data/assigned298.json");
@@ -13,9 +13,10 @@ define(["database","./core/autoAssign","./core/fastNmrShiftDBPred1H","./core/sav
         var result = [];
         var hoseResult = [];
         for(i=0;i<MAXITER;i++){
-            var fastDB = createPredictionTable(db,i);
+            //var fastDB = createPredictionTable(db,i);
+            fastDB = db;
             console.log("Iteration: "+i);
-            hoseResult.push({"iteration": i, values: stats.hoseStats(testSet,{
+            hoseResult.push({"iteration": i, values: stats.hoseStats(testSet, nmrShiftDBPred1H, {
                 "db":fastDB,
                 "iterationQuery":"="+i,
                 "dataset":testSet,
@@ -26,7 +27,7 @@ define(["database","./core/autoAssign","./core/fastNmrShiftDBPred1H","./core/sav
             for(j=5;j>=2;j--){
                 console.log("Level: "+j);
                 hoseLevels.push(j);
-                error = stats.cmp2asg(testSet,{
+                error = stats.cmp2asg(testSet, nmrShiftDBPred1H, {
                     "db":fastDB,
                     "iterationQuery":"="+i,
                     "dataset":testSet,
@@ -59,7 +60,7 @@ define(["database","./core/autoAssign","./core/fastNmrShiftDBPred1H","./core/sav
             }
         }
 
-        File.save("/all_predictions_match_nolabile.json",JSON.stringify({"hoseCounts":hoseResult,"errors":result}));
+        File.save("/all_stats_nolabile.json",JSON.stringify({"hoseCounts":hoseResult,"errors":result}));
         db.close();
     }
 );

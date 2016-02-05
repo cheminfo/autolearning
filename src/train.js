@@ -163,7 +163,7 @@ define(["database","./core/autoAssign","./core/fastNmrShiftDBPred1H",
                 start = date.getTime();
                 //var error = comparePredictors(datasetSim,{"db":db,"dataset":testSet,"iteration":"="+iteration});
                 var histParams = {from:0,to:1,nBins:30};
-                var error = stats.cmp2asg(testSet,{
+                var error = stats.cmp2asg(testSet, nmrShiftDBPred1H, {
                     "db":fastDB,
                     "dataset":testSet,
                     "iterationQuery":"="+iteration,
