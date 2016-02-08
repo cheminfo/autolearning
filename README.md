@@ -20,9 +20,9 @@ Try Ask Ernö in our [visualizer] (http://visualizer.epfl.ch/tiny/xUpdmNQwUDkB7E
 
 ```curl http://script.epfl.ch/script/HD/Load/WA8LUhjzYi?filename=test%40patiny.com%2FResearch%2FNMR%2FAutoAssign%2Fdata%2Fcheminfo443.zip > src/data/cheminfo443.zip ; src/data/cheminfo443.zip -d src/data/```
 
-The downloaded .bz2 of the maybridge dataset contains a tab separated file, which includes the maybridge catalogID, the molfile and the jcamp-dx. 
+The .bz2 of the maybridge dataset contains a tab separated file, which includes the maybridge catalogID, the molfile and the jcamp-dx of the corresponding spectrum for each molecule in the dataset.
 
-The .zip of the cheminfo443 dataset contains a folder including a separated file for each molfile and jcamp-dx of each of the 443 molecules in the dataset.
+The .zip of the cheminfo443 dataset contains the molfiles and jcamp-dx  for each of the molecules in the dataset as separate files.
   
   5. Modify src/schemas/nmrshiftdb.sql if you want to change the database name or password:
   
