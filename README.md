@@ -1,7 +1,7 @@
 # autolearning
 
 
-Try Ask Ernö in our [visualizer] (http://visualizer.epfl.ch/tiny/r8cjIcLSVbEorw11WfGO) (It could take a while the first time.)
+Try Ask Ernö in our [visualizer] (http://www.cheminfo.org/flavor/askerno/index.html) (It could take a while the first time.)
 
 ##Installation
 
